@@ -18,7 +18,7 @@
 <body>
     <div class="header">
         <h2>KENANGA MOTOR PURWAKARTA</h2>
-        <p>Laporan Transaksi Penjualan & Pembiayaan Motor</p>
+        <p>Laporan Transaksi Penjualan &amp; Pembiayaan Motor</p>
         <hr>
     </div>
     <table>

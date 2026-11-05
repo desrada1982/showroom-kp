@@ -92,7 +92,7 @@
                         </h6>
                         <div class="row">
                             <div class="col-md-6 mb-2">
-                                <div class="custom-control custom-radio custom-control-inline p-3 border rounded w-100 bg-light" style="cursor: pointer;">
+                                <div class="custom-control custom-radio custom-control-inline p-3 border rounded w-100 bg-light" style="cursor: pointer;" onclick="document.getElementById('metodeCash').checked = true; toggleMetodePembayaran();">
                                     <input type="radio" id="metodeCash" name="metode_pembayaran" value="Cash" class="custom-control-input" onchange="toggleMetodePembayaran()" {{ old('metode_pembayaran', 'Cash') == 'Cash' ? 'checked' : '' }}>
                                     <label class="custom-control-label font-weight-bold text-dark w-100" for="metodeCash" style="cursor: pointer;">
                                         <i class="fas fa-wallet text-success mr-2"></i> Pembelian Cash / Tunai
@@ -101,7 +101,7 @@
                                 </div>
                             </div>
                             <div class="col-md-6 mb-2">
-                                <div class="custom-control custom-radio custom-control-inline p-3 border rounded w-100 bg-light" style="cursor: pointer;">
+                                <div class="custom-control custom-radio custom-control-inline p-3 border rounded w-100 bg-light" style="cursor: pointer;" onclick="document.getElementById('metodeKredit').checked = true; toggleMetodePembayaran();">
                                     <input type="radio" id="metodeKredit" name="metode_pembayaran" value="Kredit" class="custom-control-input" onchange="toggleMetodePembayaran()" {{ old('metode_pembayaran') == 'Kredit' ? 'checked' : '' }}>
                                     <label class="custom-control-label font-weight-bold text-dark w-100" for="metodeKredit" style="cursor: pointer;">
                                         <i class="fas fa-hand-holding-usd text-primary mr-2"></i> Pembelian Kredit / Leasing
@@ -113,7 +113,7 @@
                     </div>
 
                     <!-- PANEL FORM KHUSUS KREDIT / LEASING (MUNCUL OTOMATIS JIKA KREDIT DIPILIH) -->
-                    <div class="card border border-primary mb-4" id="panelKredit" style="display: none; background-color: #f4f8ff;">
+                    <div class="card border border-primary mb-4" id="panelKredit" style="{{ old('metode_pembayaran') == 'Kredit' ? '' : 'display: none;' }} background-color: #f4f8ff;">
                         <div class="card-header bg-primary text-white py-2">
                             <h6 class="mb-0 text-white font-weight-bold">
                                 <i class="fas fa-file-signature mr-1"></i> Rincian Pembiayaan Leasing & Uang Muka (DP)
@@ -233,12 +233,16 @@
 
     function updateTotalHarga() {
         const select = document.getElementById('selectMotor');
-        const harga = parseFloat(select.options[select.selectedIndex].getAttribute('data-harga') || 0);
-        const jumlah = parseInt(document.getElementById('inputJumlahBeli').value || 1);
+        if (!select || select.selectedIndex < 0) return;
+        const selectedOption = select.options[select.selectedIndex];
+        const harga = parseFloat(selectedOption ? selectedOption.getAttribute('data-harga') : 0) || 0;
+        const jumlahInput = document.getElementById('inputJumlahBeli');
+        const jumlah = parseInt(jumlahInput ? jumlahInput.value : 1) || 1;
         const total = harga * jumlah;
 
         const formatRupiah = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(total);
-        document.getElementById('labelTotalHarga').innerText = formatRupiah;
+        const label = document.getElementById('labelTotalHarga');
+        if (label) label.innerText = formatRupiah;
     }
 
     function updateInfoMotor() {

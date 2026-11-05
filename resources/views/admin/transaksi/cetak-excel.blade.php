@@ -1,13 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
 <table>
     <thead>
-        <!-- Baris Judul (Merge 8 Kolom & Rata Tengah) -->
+        <!-- Baris Judul (Merge 12 Kolom & Rata Tengah) -->
         <tr>
-            <th colspan="8" style="text-align: center; font-weight: bold; font-size: 14px;">
-                LAPORAN TRANSAKSI PENJUALAN & PEMBIAYAAN MOTOR - KENANGA MOTOR
+            <th colspan="12" style="text-align: center; font-weight: bold; font-size: 14px;">
+                LAPORAN TRANSAKSI PENJUALAN &amp; PEMBIAYAAN MOTOR - KENANGA MOTOR
             </th>
         </tr>
         <tr>
-            <th colspan="8"></th>
+            <th colspan="12"></th>
         </tr>
         <!-- Header Tabel -->
         <tr>
@@ -26,7 +32,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach($transaksis as $index => $trx)
+        @forelse($transaksis as $index => $trx)
         <tr>
             <td style="text-align: center; border: 1px solid #000000;">{{ $index + 1 }}</td>
             <td style="border: 1px solid #000000;">{{ \Carbon\Carbon::parse($trx->tanggal)->format('d-m-Y') }}</td>
@@ -41,6 +47,12 @@
             <td style="border: 1px solid #000000; text-align: center;">{{ $trx->tenor ? $trx->tenor . ' Bulan' : '-' }}</td>
             <td style="border: 1px solid #000000;">{{ $trx->angsuran_per_bulan ? 'Rp ' . number_format($trx->angsuran_per_bulan, 0, ',', '.') : '-' }}</td>
         </tr>
-        @endforeach
+        @empty
+        <tr>
+            <td colspan="12" style="text-align: center; border: 1px solid #000000;">Belum ada data transaksi.</td>
+        </tr>
+        @endforelse
     </tbody>
 </table>
+</body>
+</html>

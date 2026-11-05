@@ -14,6 +14,8 @@
   <!-- Template CSS -->
   <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/css/components.css') }}">
+
+  @stack('styles')
 </head>
 
 <body>
@@ -122,5 +124,8 @@
   <!-- Template JS File -->
   <script src="{{ asset('assets/js/scripts.js') }}"></script>
   <script src="{{ asset('assets/js/custom.js') }}"></script>
+
+  <!-- Page Specific JS File -->
+  @stack('scripts')
 </body>
 </html>
