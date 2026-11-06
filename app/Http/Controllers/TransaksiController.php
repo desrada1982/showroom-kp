@@ -62,9 +62,12 @@ class TransaksiController extends Controller
         // 2. Cari data motor yang dipilih
         $motor = Motor::findOrFail($request->motor_id);
 
-        // 3. Cek apakah stoknya cukup
+        // 3. Cek apakah stoknya cukup (dan tidak boleh 0 atau minus)
+        if ($motor->stok <= 0) {
+            return back()->with('error', 'Gagal! Motor ini sudah habis terjual (stok 0).');
+        }
         if ($request->jumlah_beli > $motor->stok) {
-            return back()->with('error', 'Gagal! Stok motor tidak mencukupi.');
+            return back()->with('error', 'Gagal! Stok motor tidak mencukupi. Stok tersedia: ' . $motor->stok . ' unit.');
         }
 
         // 4. Hitung total harga otomatis
@@ -100,8 +103,9 @@ class TransaksiController extends Controller
 
         Transaksi::create($data);
 
-        // 6. KURANGI STOK MOTOR OTOMATIS
-        $motor->decrement('stok', $request->jumlah_beli);
+        // 6. KURANGI STOK MOTOR OTOMATIS (tidak boleh minus, minimum 0)
+        $stok_baru = max(0, $motor->stok - $request->jumlah_beli);
+        $motor->update(['stok' => $stok_baru]);
 
         return redirect()->route('transaksi.index')->with('success', 'Transaksi berhasil disimpan!');
     }

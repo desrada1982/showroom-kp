@@ -9,7 +9,8 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Motor::where('stok', '>', 0)->latest();
+        // Ambil semua motor (termasuk stok 0 untuk ditampilkan sebagai Sold Out)
+        $query = Motor::latest();
 
         if ($request->has('cari') && $request->cari != '') {
             $query->where(function ($q) use ($request) {
