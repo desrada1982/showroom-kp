@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Spesifikasi {{ $motor->nama_motor }} &mdash; Kenanga Motor</title>
     
     <!-- Google Fonts: Plus Jakarta Sans -->
@@ -24,10 +24,28 @@
             --showroom-card-border: #e2e8f0;
         }
 
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100%;
+        }
+
         body { 
             font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
             background-color: var(--showroom-light); 
             color: #334155;
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100%;
+            position: relative;
+        }
+
+        .container {
+            max-width: 100%;
         }
 
         .img-detail { 
@@ -80,7 +98,7 @@
 
     <!-- Konten Detail -->
     <div class="container mb-5">
-        <div class="row bg-white p-4 p-md-5 rounded-3 border shadow-sm g-4">
+        <div class="row bg-white p-3 p-md-5 rounded-3 border shadow-sm g-4 mx-0">
             
             <!-- Bagian Kiri: Galeri 3 Sudut Foto Motor -->
             <div class="col-lg-6">

@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Kenanga Motor &mdash; Jual Beli Motor Berkualitas & Terpercaya</title>
     
     <!-- Google Fonts: Plus Jakarta Sans -->
@@ -25,12 +25,39 @@
             --showroom-card-border: #e2e8f0;
         }
 
-        html { scroll-behavior: smooth; }
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        html { 
+            scroll-behavior: smooth; 
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100%;
+        }
         body { 
             font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
             background-color: var(--showroom-light); 
             color: #334155;
             padding-top: 72px; 
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100%;
+            position: relative;
+        }
+
+        /* Mencegah kebocoran horizontal (space putih) di mobile */
+        section, footer, nav, .container, .container-fluid {
+            max-width: 100%;
+        }
+
+        section, footer {
+            overflow-x: hidden;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
         }
 
         /* Hero Section dengan Kontras Tinggi & Nuansa Otomotif */
@@ -172,6 +199,31 @@
                 transform: none !important;
                 transition: none !important;
                 animation: none !important;
+            }
+        }
+
+        /* Penyesuaian Responsif Layar Mobile / HP agar Pas Tanpa Leak (antislop-layoutmobile) */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 66px;
+            }
+            .section-padding {
+                padding: 48px 0;
+            }
+            .hero-section {
+                padding: 50px 0 60px;
+            }
+            /* Ganti translasi horizontal (X) dengan translasi vertikal (Y) di HP agar tidak menyebabkan horizontal overflow */
+            .reveal-from-left,
+            .reveal-from-right {
+                transform: translateY(20px) !important;
+            }
+            .reveal-from-left.is-revealed,
+            .reveal-from-right.is-revealed {
+                transform: translateY(0) !important;
+            }
+            .map-container {
+                height: 280px;
             }
         }
     </style>
@@ -410,19 +462,19 @@
                         </div>
                         <p class="text-muted small mb-4">Kenanga Motor bermitra langsung dengan pihak leasing resmi yang terdaftar dan diawasi oleh OJK (Otoritas Jasa Keuangan).</p>
 
-                        <div class="position-relative ps-4 border-start border-2 border-primary border-opacity-25 pb-2">
+                        <div class="position-relative ps-4 ms-2 border-start border-2 border-primary border-opacity-25 pb-2">
                             <div class="mb-4 position-relative">
-                                <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-primary" style="left: -25px !important;">1</span>
+                                <span class="position-absolute top-0 badge rounded-pill bg-primary" style="left: -1.5rem; transform: translate(-50%, 0);">1</span>
                                 <h6 class="fw-bold text-dark mb-1">Pilih Unit & Konsultasi Angsuran</h6>
                                 <p class="text-muted small mb-0">Tentukan motor pilihan dan sesuaikan DP serta tenor cicilan (11, 23, atau 35 bulan) sesuai kemampuan Anda.</p>
                             </div>
                             <div class="mb-4 position-relative">
-                                <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-primary" style="left: -25px !important;">2</span>
+                                <span class="position-absolute top-0 badge rounded-pill bg-primary" style="left: -1.5rem; transform: translate(-50%, 0);">2</span>
                                 <h6 class="fw-bold text-dark mb-1">Penyiapan & Verifikasi Dokumen</h6>
                                 <p class="text-muted small mb-0">Tim sales kami akan mendampingi pengumpulan berkas KTP, KK, dan bukti penghasilan untuk diserahkan ke pihak leasing.</p>
                             </div>
                             <div class="position-relative">
-                                <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-success" style="left: -25px !important;">3</span>
+                                <span class="position-absolute top-0 badge rounded-pill bg-success" style="left: -1.5rem; transform: translate(-50%, 0);">3</span>
                                 <h6 class="fw-bold text-dark mb-1">Survei Cepat & Pengiriman Unit</h6>
                                 <p class="text-muted small mb-0">Proses persetujuan (approval) cepat 1 hari kerja. Setelah disetujui, unit motor diantar langsung ke rumah Anda!</p>
                             </div>

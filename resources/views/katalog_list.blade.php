@@ -95,6 +95,6 @@
 </div>
 
 <!-- Paginasi -->
-<div class="d-flex justify-content-center mt-5">
+<div class="d-flex justify-content-center mt-5 overflow-auto w-100 py-2">
     {{ $motors->withQueryString()->links() }}
 </div>
