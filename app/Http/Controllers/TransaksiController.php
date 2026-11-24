@@ -64,10 +64,14 @@ class TransaksiController extends Controller
 
         // 3. Cek apakah stoknya cukup (dan tidak boleh 0 atau minus)
         if ($motor->stok <= 0) {
-            return back()->with('error', 'Gagal! Motor ini sudah habis terjual (stok 0).');
+            return back()->withInput()->withErrors([
+                'motor_id' => 'Gagal! Motor ' . $motor->nama_motor . ' sudah habis terjual (stok 0).'
+            ])->with('error', 'Gagal! Motor ' . $motor->nama_motor . ' sudah habis terjual (stok 0).');
         }
         if ($request->jumlah_beli > $motor->stok) {
-            return back()->with('error', 'Gagal! Stok motor tidak mencukupi. Stok tersedia: ' . $motor->stok . ' unit.');
+            return back()->withInput()->withErrors([
+                'jumlah_beli' => 'Jumlah beli (' . $request->jumlah_beli . ' unit) melebihi stok yang tersedia (' . $motor->stok . ' unit).'
+            ])->with('error', 'Gagal menyimpan transaksi! Jumlah beli (' . $request->jumlah_beli . ' unit) melebihi stok motor ' . $motor->nama_motor . ' yang tersedia saat ini (Sisa stok: ' . $motor->stok . ' unit).');
         }
 
         // 4. Hitung total harga otomatis

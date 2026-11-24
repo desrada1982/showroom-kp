@@ -10,18 +10,45 @@
                 <h4><i class="fas fa-cart-plus mr-2 text-primary"></i> Form Tambah Transaksi Penjualan Motor</h4>
             </div>
             <div class="card-body">
-                <!-- Pesan Error Validasi -->
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+                <!-- Pesan Notifikasi Error / Sukses Flash Session -->
+                @if (session('error'))
+                    <div class="alert alert-danger alert-dismissible show fade shadow-sm mb-4">
+                        <div class="alert-body d-flex align-items-center">
+                            <i class="fas fa-exclamation-circle fa-2x mr-3 text-white"></i>
+                            <div class="flex-grow-1">
+                                <h6 class="font-weight-bold mb-1">Transaksi Ditolak!</h6>
+                                <span>{{ session('error') }}</span>
+                            </div>
+                            <button class="close ml-3" data-dismiss="alert"><span>&times;</span></button>
+                        </div>
                     </div>
                 @endif
 
-                <form action="{{ route('transaksi.store') }}" method="POST">
+                @if (session('success'))
+                    <div class="alert alert-success alert-dismissible show fade shadow-sm mb-4">
+                        <div class="alert-body">
+                            <button class="close" data-dismiss="alert"><span>&times;</span></button>
+                            <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Pesan Error Validasi Form -->
+                @if ($errors->any())
+                    <div class="alert alert-danger alert-dismissible show fade shadow-sm mb-4">
+                        <div class="alert-body">
+                            <button class="close" data-dismiss="alert"><span>&times;</span></button>
+                            <h6 class="font-weight-bold mb-1"><i class="fas fa-exclamation-triangle mr-1"></i> Perhatian:</h6>
+                            <ul class="mb-0 pl-3">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                @endif
+
+                <form action="{{ route('transaksi.store') }}" method="POST" id="formTransaksi" onsubmit="return handleFormSubmit(event)">
                     @csrf 
 
                     <!-- BAGIAN 1: DATA PEMBELI & MOTOR -->
@@ -32,7 +59,10 @@
                             </h6>
                             <div class="form-group">
                                 <label>Nama Lengkap Pembeli <span class="text-danger">*</span></label>
-                                <input type="text" name="nama_pembeli" class="form-control" placeholder="Contoh: Bpk. Ridwan Fauzi" value="{{ old('nama_pembeli') }}" required>
+                                <input type="text" name="nama_pembeli" class="form-control @error('nama_pembeli') is-invalid @enderror" placeholder="Contoh: Bpk. Ridwan Fauzi" value="{{ old('nama_pembeli') }}" required>
+                                @error('nama_pembeli')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="form-group">
                                 <label>NIK / No. KTP Pembeli <small class="text-muted">(Penting untuk kontrak leasing)</small></label>
@@ -50,21 +80,31 @@
                             </h6>
                             <div class="form-group">
                                 <label>Pilih Unit Motor <span class="text-danger">*</span></label>
-                                <select name="motor_id" id="selectMotor" class="form-control" required onchange="updateInfoMotor()">
-                                    <option value="" data-harga="0">-- Pilih Motor Tersedia --</option>
+                                <select name="motor_id" id="selectMotor" class="form-control @error('motor_id') is-invalid @enderror" required onchange="updateInfoMotor()">
+                                    <option value="" data-harga="0" data-stok="0">-- Pilih Motor Tersedia --</option>
                                     @foreach($motors as $motor)
-                                        <option value="{{ $motor->id }}" data-harga="{{ $motor->harga }}" {{ old('motor_id') == $motor->id ? 'selected' : '' }}>
+                                        <option value="{{ $motor->id }}" data-harga="{{ $motor->harga }}" data-stok="{{ $motor->stok }}" data-nama="{{ $motor->nama_motor }}" {{ old('motor_id') == $motor->id ? 'selected' : '' }}>
                                             {{ $motor->nama_motor }} - {{ $motor->merek }} ({{ $motor->kondisi }} {{ $motor->tahun }}) | Stok: {{ $motor->stok }} | Rp {{ number_format($motor->harga, 0, ',', '.') }}
                                         </option>
                                     @endforeach
                                 </select>
+                                @error('motor_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="row">
                                 <div class="col-sm-6">
                                     <div class="form-group">
-                                        <label>Jumlah Beli <span class="text-danger">*</span></label>
-                                        <input type="number" name="jumlah_beli" id="inputJumlahBeli" class="form-control" required min="1" value="{{ old('jumlah_beli', 1) }}" onchange="updateTotalHarga()">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <label class="mb-0">Jumlah Beli <span class="text-danger">*</span></label>
+                                            <span id="badgeInfoStok" class="badge badge-info text-white" style="display: none; font-size: 0.75rem;"></span>
+                                        </div>
+                                        <input type="number" name="jumlah_beli" id="inputJumlahBeli" class="form-control @error('jumlah_beli') is-invalid @enderror" required min="1" value="{{ old('jumlah_beli', 1) }}" oninput="validasiStokDanHitungTotal()" onchange="validasiStokDanHitungTotal()">
+                                        <div id="feedbackStokError" class="invalid-feedback font-weight-bold" style="display: none;"></div>
+                                        @error('jumlah_beli')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
@@ -194,11 +234,17 @@
                         </div>
                     </div>
 
+                    <!-- Kotak Notifikasi Alert jika Melebihi Stok -->
+                    <div id="alertBatasStok" class="alert alert-danger font-weight-bold mb-3 shadow-sm" style="display: none;">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <span id="textBatasStok"></span>
+                    </div>
+
                     <div class="text-right">
                         <a href="{{ route('transaksi.index') }}" class="btn btn-secondary mr-2">
                             <i class="fas fa-arrow-left mr-1"></i> Batal
                         </a>
-                        <button type="submit" class="btn btn-primary px-4">
+                        <button type="submit" id="btnSimpanTransaksi" class="btn btn-primary px-4">
                             <i class="fas fa-save mr-1"></i> Simpan Transaksi Penjualan
                         </button>
                     </div>
@@ -231,27 +277,87 @@
         }
     }
 
-    function updateTotalHarga() {
+    function validasiStokDanHitungTotal() {
         const select = document.getElementById('selectMotor');
         if (!select || select.selectedIndex < 0) return;
+
         const selectedOption = select.options[select.selectedIndex];
         const harga = parseFloat(selectedOption ? selectedOption.getAttribute('data-harga') : 0) || 0;
+        const stok = parseInt(selectedOption ? selectedOption.getAttribute('data-stok') : 0) || 0;
+        const namaMotor = selectedOption ? (selectedOption.getAttribute('data-nama') || 'unit motor') : 'unit motor';
+        
         const jumlahInput = document.getElementById('inputJumlahBeli');
-        const jumlah = parseInt(jumlahInput ? jumlahInput.value : 1) || 1;
-        const total = harga * jumlah;
+        const jumlah = parseInt(jumlahInput ? jumlahInput.value : 1) || 0;
 
+        const badgeInfo = document.getElementById('badgeInfoStok');
+        const feedbackError = document.getElementById('feedbackStokError');
+        const alertBatas = document.getElementById('alertBatasStok');
+        const textBatas = document.getElementById('textBatasStok');
+        const btnSimpan = document.getElementById('btnSimpanTransaksi');
+
+        // Tampilkan info badge stok motor jika motor dipilih
+        if (select.value && stok > 0) {
+            badgeInfo.style.display = 'inline-block';
+            badgeInfo.innerText = 'Sisa Stok: ' + stok + ' Unit';
+            jumlahInput.setAttribute('max', stok);
+        } else {
+            badgeInfo.style.display = 'none';
+            jumlahInput.removeAttribute('max');
+        }
+
+        // Pengecekan apakah jumlah beli melebihi stok
+        if (select.value && stok > 0 && jumlah > stok) {
+            jumlahInput.classList.add('is-invalid');
+            feedbackError.style.display = 'block';
+            feedbackError.innerText = 'Jumlah beli (' + jumlah + ' unit) melebihi stok ' + namaMotor + ' yang tersedia (' + stok + ' unit)!';
+
+            alertBatas.style.display = 'block';
+            textBatas.innerText = 'Peringatan: Jumlah pembelian (' + jumlah + ' unit) melebihi stok motor ' + namaMotor + '! Sisa stok yang tersedia saat ini hanya ' + stok + ' unit. Silakan kurangi jumlah beli.';
+            if (btnSimpan) {
+                btnSimpan.setAttribute('disabled', 'disabled');
+            }
+        } else {
+            jumlahInput.classList.remove('is-invalid');
+            feedbackError.style.display = 'none';
+            alertBatas.style.display = 'none';
+            if (btnSimpan) {
+                btnSimpan.removeAttribute('disabled');
+            }
+        }
+
+        // Hitung total harga
+        const total = harga * (jumlah > 0 ? jumlah : 1);
         const formatRupiah = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(total);
         const label = document.getElementById('labelTotalHarga');
         if (label) label.innerText = formatRupiah;
     }
 
     function updateInfoMotor() {
-        updateTotalHarga();
+        validasiStokDanHitungTotal();
+    }
+
+    function handleFormSubmit(event) {
+        const select = document.getElementById('selectMotor');
+        if (!select || select.selectedIndex < 0) return true;
+
+        const selectedOption = select.options[select.selectedIndex];
+        const stok = parseInt(selectedOption ? selectedOption.getAttribute('data-stok') : 0) || 0;
+        const namaMotor = selectedOption ? (selectedOption.getAttribute('data-nama') || 'unit motor') : 'unit motor';
+        const jumlahInput = document.getElementById('inputJumlahBeli');
+        const jumlah = parseInt(jumlahInput ? jumlahInput.value : 0) || 0;
+
+        if (select.value && stok > 0 && jumlah > stok) {
+            event.preventDefault();
+            alert('Transaksi tidak dapat diproses!\nJumlah pembelian (' + jumlah + ' unit) melebihi sisa stok motor ' + namaMotor + ' (' + stok + ' unit).');
+            jumlahInput.focus();
+            return false;
+        }
+        return true;
     }
 
     document.addEventListener("DOMContentLoaded", function() {
         toggleMetodePembayaran();
-        updateTotalHarga();
+        validasiStokDanHitungTotal();
     });
 </script>
 @endpush
